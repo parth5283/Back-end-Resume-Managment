@@ -25,33 +25,37 @@ const getEmployeeById  = (req, res) =>
         res.status(200).json(results.rows)})
 };
 app.use(bodyParser.json());
-const addEmployee = (req, res) => {
-    console.log(req.body);
+const addEmployee = async (req, res) => {
+  try {
     const { name, email, phonenumber, address, zipcode, profilesummary } = req.body;
-  
-    // check if email exists
-    pool.query(queries.checkEmailExists, [email], (error, results) => {
-      if (error) {
-        console.log(error);
-        return res.status(500).send('An error occurred');
-      }
-  
-      if (results.rows.length) {
-        return res.send('Email already exists');
-      }
-  
-      // add employee to db
-      pool.query(
-        queries.addEmployee,
-        [name, email, phonenumber, address, zipcode, profilesummary],
-        (error, results) => {
-          if (error) {
-            console.log(error);
-            return res.status(500).send('An error occurred');
-          }
-       
+
+    // Check if email exists
+    const checkEmailExistsResult = await pool.query(queries.checkEmailExists, [email]);
+    if (checkEmailExistsResult.rows.length) {
+      return res.send('Email already exists');
+    }
+
+    // Add employee to db
+    const addEmployeeResult = await pool.query(queries.addEmployee, [
+      name,
+      email,
+      phonenumber,
+      address,
+      zipcode,
+      profilesummary,
+    ]);
+    
+    console.log('Employee added successfully. Employee ID:', addEmployeeResult.rows[0].employeeid);
+    return res.send({
+      message: 'Employee added successfully',
+      employeeId: addEmployeeResult.rows[0].employeeid
     });
- } )};
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send('An error occurred');
+  }
+};
+
  const getProjectDetails = (req, res) =>
 {
   pool.query(queries.getProjects,(error,results) => {
@@ -59,26 +63,53 @@ const addEmployee = (req, res) => {
     res.status(200).json(results.rows);
   })
 };
- const addProjectDetails = (req, res) => {
-  console.log(req.body);
-  const {projectname,startdate,enddate,technologiesused,rolesandresponsibilities,projectdescription } = req.body;
+const addProjectDetails = (req, res) => {
+  const { projects } = req.body;
 
-  
+  console.log("projects:", projects);
+  projects.forEach((project) => {
+    const {
+      employeeId,
+      project: {
+        name: projectname,
+        startDate: startdate,
+        endDate: enddate,
+        technologiesUsed: technologiesused,
+        rolesAndResponsibilities: rolesandresponsibilities,
+        projectDescription: projectdescription,
+        // Include other project properties
+      }
+    } = project;
 
-    // add project to db
+    console.log("project:", project);
+    // Add project to the database using your desired method (e.g., using pool.query)
     pool.query(
       queries.addProjectDetails,
-      [projectname,startdate,enddate,technologiesused,rolesandresponsibilities,projectdescription],
+      [employeeId, project.project.projectname, 
+        project.project.startdate,
+        project.project.enddate, 
+        project.project.technologiesused,
+        project.project.rolesandresponsibilities, 
+        project.project.projectdescription],
       (error, results) => {
         if (error) {
           console.log(error);
           return res.status(500).send('An error occurred');
         }
-     
+      }
+    );
   });
- };
 
+  res.status(200).send('Projects added successfully');
+};
 
+ const getUserDetails = (req, res) =>
+  {
+    pool.query(queries.getUser,(error,results) => {
+      if(error) throw error;
+      res.status(200).json(results.rows);
+    })
+  };
   // Delete employee from database
   const removeEmployee = (req, res) => {
     const id = parseInt(req.params.id);
@@ -137,5 +168,5 @@ const updateEmployee=(req,res) =>
 
 
 module.exports ={
-    getEmployeeDetails,getEmployeeById,addEmployee,removeEmployee,updateEmployee,addProjectDetails,getProjectDetails,
+    getEmployeeDetails,getEmployeeById,addEmployee,removeEmployee,updateEmployee,addProjectDetails,getProjectDetails,getUserDetails,
 };

@@ -1,6 +1,6 @@
 const Employee = require("./employee.model.js");
 module.exports = (sequelize, Sequelize) => {
-    const skillDetails = sequelize.define("employeeprofessionaldetails", {
+    const skillDetails = sequelize.define("certificateandskillsdetails", {
         employeeid: {
             type: Sequelize.INTEGER,
             references: {

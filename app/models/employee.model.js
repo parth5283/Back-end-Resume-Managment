@@ -23,13 +23,7 @@ module.exports = (sequelize, Sequelize) => {
       profilesummary: {
         type: Sequelize.STRING
       },
-      userid: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "userdetails",
-          key: "userid"
-        }
-      },
+    
       resumefile:{
         type: Sequelize.BLOB
       }
