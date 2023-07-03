@@ -7,22 +7,21 @@ const bodyParser = require("body-parser");
 const app = express();
 app.use(cors());
 
-const getEmployeeDetails = (req, res) =>
-{
-  pool.query(queries.getEmployee,(error,results) => {
-    if(error) throw error;
+const getEmployeeDetails = (req, res) => {
+  pool.query(queries.getEmployee, (error, results) => {
+    if (error) throw error;
     res.status(200).json(results.rows);
   })
 };
 
-const getEmployeeById  = (req, res) =>
-{
-    const id = parseInt(req.params.id);
-    pool.query(queries.getEmployeeById,[id],(error,results) => {
-        if(error) {
-          console.log(error);
-        }
-        res.status(200).json(results.rows)})
+const getEmployeeById = (req, res) => {
+  const id = parseInt(req.params.id);
+  pool.query(queries.getEmployeeById, [id], (error, results) => {
+    if (error) {
+      console.log(error);
+    }
+    res.status(200).json(results.rows)
+  })
 };
 app.use(bodyParser.json());
 const addEmployee = async (req, res) => {
@@ -44,7 +43,7 @@ const addEmployee = async (req, res) => {
       zipcode,
       profilesummary,
     ]);
-    
+
     console.log('Employee added successfully. Employee ID:', addEmployeeResult.rows[0].employeeid);
     return res.send({
       message: 'Employee added successfully',
@@ -56,13 +55,44 @@ const addEmployee = async (req, res) => {
   }
 };
 
- const getProjectDetails = (req, res) =>
-{
-  pool.query(queries.getProjects,(error,results) => {
-    if(error) throw error;
+const getProjectDetails = (req, res) => {
+  pool.query(queries.getProjects, (error, results) => {
+    if (error) throw error;
     res.status(200).json(results.rows);
   })
 };
+const addCertificateDetails = (req, res) => {
+  const { certificates } = req.body;
+  console.log("certificates:", certificates);
+  certificates.forEach((certificate) => {
+    const {
+      employeeId,
+      certificate: {
+        certificationname: certificationname,
+        certificationdate: certificationdate,
+        certificateexpirydate: certficationexpirydate,
+        technicalskills: technicalskills,
+      }
+    } = certificate;
+    console.log("certificate:", certificate);
+    pool.query(
+      queries.addCertificateDetails,
+      [employeeId, certificate.certificate.certificationname,
+        certificate.certificate.certificationdate,
+        certificate.certificate.certificationexpirydate,
+        certificate.certificate.technicalskills,
+      ],
+      (error, results) => {
+        if (error) {
+          console.log(error);
+          return res.status(500).send('An error occurred');
+        }
+      }
+    );
+  });
+
+  res.status(200).send('Certificate and skills added successfully');
+}
 const addProjectDetails = (req, res) => {
   const { projects } = req.body;
 
@@ -85,11 +115,11 @@ const addProjectDetails = (req, res) => {
     // Add project to the database using your desired method (e.g., using pool.query)
     pool.query(
       queries.addProjectDetails,
-      [employeeId, project.project.projectname, 
+      [employeeId, project.project.projectname,
         project.project.startdate,
-        project.project.enddate, 
+        project.project.enddate,
         project.project.technologiesused,
-        project.project.rolesandresponsibilities, 
+        project.project.rolesandresponsibilities,
         project.project.projectdescription],
       (error, results) => {
         if (error) {
@@ -103,70 +133,68 @@ const addProjectDetails = (req, res) => {
   res.status(200).send('Projects added successfully');
 };
 
- const getUserDetails = (req, res) =>
-  {
-    pool.query(queries.getUser,(error,results) => {
-      if(error) throw error;
-      res.status(200).json(results.rows);
-    })
-  };
-  // Delete employee from database
-  const removeEmployee = (req, res) => {
-    const id = parseInt(req.params.id);
-    
-    if (isNaN(id)) {
-      return res.status(400).send("Invalid employee ID");
+const getUserDetails = (req, res) => {
+  pool.query(queries.getUser, (error, results) => {
+    if (error) throw error;
+    res.status(200).json(results.rows);
+  })
+};
+// Delete employee from database
+const removeEmployee = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    return res.status(400).send("Invalid employee ID");
+  }
+
+  pool.query(queries.getEmployeeById, [id], (error, results) => {
+    if (error) {
+      console.log(error);
+      return res.status(500).send("An error occurred");
     }
-    
-    pool.query(queries.getEmployeeById, [id], (error, results) => {
+
+    const noEmployeeFound = !results || !results.rows || results.rows.length === 0;
+    if (noEmployeeFound) {
+      return res.status(404).send("Employee does not exist in the database");
+    }
+
+    pool.query(queries.removeEmployee, [id], (error, results) => {
       if (error) {
         console.log(error);
         return res.status(500).send("An error occurred");
       }
-      
-      const noEmployeeFound = !results || !results.rows || results.rows.length === 0;
-      if (noEmployeeFound) {
-        return res.status(404).send("Employee does not exist in the database");
-      }
-      
-      pool.query(queries.removeEmployee, [id], (error, results) => {
-        if (error) {
-          console.log(error);
-          return res.status(500).send("An error occurred");
-        }
-        
-        res.status(200).send("Employee Removed Successfully");
-      });
+
+      res.status(200).send("Employee Removed Successfully");
     });
-  };
+  });
+};
 
-const updateEmployee=(req,res) =>
-{
-    const id = parseInt(req.params.id);
-    const{name,email} = req.body;
+const updateEmployee = (req, res) => {
+  const id = parseInt(req.params.id);
+  const { name, email } = req.body;
 
-    pool.query(queries.getEmployeeById, [id],(error,results) => {
-        const noEmployeeFound = !results.rows.length;
-        if(noEmployeeFound){
-            res.send("Employee does not exist in db"); 
-        }
-        pool.query(queries.updateEmployee,[name,email,id],(error,results) => {
-            if(error) 
-                {
-                       console.log(error);
-                }
-                else{
-                    res.status(200).send("Employee Updated Successfully");
-                }
-        });
+  pool.query(queries.getEmployeeById, [id], (error, results) => {
+    const noEmployeeFound = !results.rows.length;
+    if (noEmployeeFound) {
+      res.send("Employee does not exist in db");
     }
-    );
+    pool.query(queries.updateEmployee, [name, email, id], (error, results) => {
+      if (error) {
+        console.log(error);
+      }
+      else {
+        res.status(200).send("Employee Updated Successfully");
+      }
+    });
+  }
+  );
 
 }
 
 
 
 
-module.exports ={
-    getEmployeeDetails,getEmployeeById,addEmployee,removeEmployee,updateEmployee,addProjectDetails,getProjectDetails,getUserDetails,
+module.exports = {
+  getEmployeeDetails, getEmployeeById, addEmployee, removeEmployee, updateEmployee,
+  addProjectDetails, getProjectDetails, getUserDetails, addCertificateDetails
 };

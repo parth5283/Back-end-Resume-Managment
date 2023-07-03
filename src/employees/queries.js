@@ -8,7 +8,9 @@ const removeEmployee =  "delete from employeepersonaldetails where employeeid =$
 const updateEmployee ="update employeepersonaldetails SET name = $1,email = $2 WHERE employeeid = $3";
 const downloadPDF ="SELECT resumefile FROM employeepersonaldetails WHERE employeeid = $1";
 const addProjectDetails = "insert into employeeprojectdetails(employeeid,projectname,startdate,enddate,technologiesused,rolesandresponsibilities,projectdescription) VALUES($1,$2,$3,$4,$5,$6,$7)";
+const addCertificateDetails = "insert into certificateandskillsdetails(employeeid,certificationname,certificationdate,certificationexpirydate,technicalskills) VALUES($1,$2,$3,$4,$5)";
 const getProjects = "select projectname,startdate,enddate,technologiesused,rolesandresponsibilities,projectdescription from employeeprojectdetails";
 module.exports ={
-    getEmployee,getEmployeeById,checkEmailExists,addEmployee,removeEmployee,updateEmployee,downloadPDF,getUser,addProjectDetails,getProjects
+    getEmployee,getEmployeeById,checkEmailExists,addEmployee,removeEmployee,updateEmployee,downloadPDF,getUser,
+    addProjectDetails,getProjects,addCertificateDetails
 }

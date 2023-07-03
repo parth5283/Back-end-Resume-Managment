@@ -10,6 +10,7 @@ router.delete('/:id',controller.removeEmployee);
 router.post('/add-projects', controller.addProjectDetails)
 router.get('/get-projects', controller.getProjectDetails);
 router.get('/get-users', controller.getUserDetails);
+router.post('/add-certificate-details', controller.addCertificateDetails);
 //router.post('/login',controller.getUserDetails);
 
 module.exports = router;
