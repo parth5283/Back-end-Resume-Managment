@@ -16,10 +16,10 @@ module.exports = (sequelize, Sequelize) => {
           certificationname: {
             type: Sequelize.STRING
           },
-          certficationdate: {
+          certificationdate: {
             type: Sequelize.DATE
           },
-          certficationexpirydate: {
+          certificationexpirydate: {
             type: Sequelize.DATE
           },
           technicalskills: {
