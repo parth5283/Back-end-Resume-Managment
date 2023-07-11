@@ -23,6 +23,7 @@ const getEmployeeById = (req, res) => {
     res.status(200).json(results.rows)
   })
 };
+
 app.use(bodyParser.json());
 const addEmployee = async (req, res) => {
   try {
@@ -192,9 +193,48 @@ const updateEmployee = (req, res) => {
 }
 
 
+const savePDFToDatabase = async (req, res) => {
+  try {
+    const employeeId = req.body.employeeId;
+    const pdfData = req.body.pdfData;
 
+    const client = await pool.connect();
+    console.log("req",req.body);
+    console.log("employeeId",employeeId);
+    await client.query('UPDATE employeepersonaldetails SET resumefile = $1 WHERE employeeid = $2', [pdfData, employeeId]);
+    client.release();
 
+    res.status(200).send('PDF saved to database successfully');
+  } catch (error) {
+    console.error('Error saving PDF:', error);
+    res.status(500).send('Error saving PDF to database');
+  }
+};
+
+const getResumeFile = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  if (isNaN(id)) {
+    return res.status(400).send("Invalid employee ID");
+  }
+
+  pool.query(queries.getResumeFile, [id], (error, results) => {
+    if (error) {
+      console.log(error);
+      return res.status(500).send("An error occurred");
+    }
+
+    const noEmployeeFound = !results || !results.rows || results.rows.length === 0;
+    if (noEmployeeFound) {
+      return res.status(404).send("Employee does not exist in the database");
+    }
+
+    const resumeFile = results.rows[0].resumefile;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.send(resumeFile);
+  });
+};
 module.exports = {
   getEmployeeDetails, getEmployeeById, addEmployee, removeEmployee, updateEmployee,
-  addProjectDetails, getProjectDetails, getUserDetails, addCertificateDetails
+  addProjectDetails, getProjectDetails, getUserDetails, addCertificateDetails,savePDFToDatabase,getResumeFile
 };

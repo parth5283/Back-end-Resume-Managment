@@ -11,6 +11,7 @@ router.post('/add-projects', controller.addProjectDetails)
 router.get('/get-projects', controller.getProjectDetails);
 router.get('/get-users', controller.getUserDetails);
 router.post('/add-certificate-details', controller.addCertificateDetails);
-//router.post('/login',controller.getUserDetails);
+router.post('/save-PDFtoDb', controller.savePDFToDatabase);
+router.get('/resume/:id', controller.getResumeFile);
 
 module.exports = router;

@@ -51,7 +51,24 @@ db.sequelize.sync().then(() => {
       return res.status(200).json({ message: 'Login successful' });
     });
   });
- 
+ // API endpoint to save the PDF
+ app.post('api/v1/employees/save-pdf', async (req, res) => {
+  // Access the PDF data from the request body or form data
+  const pdfData = req.body.pdfData;
+
+  try {
+    // Save the PDF data to the database
+    const client = await pool.connect();
+    await client.query('INSERT INTO employeepersonaldetails (resumefile) VALUES ($1)', [pdfData]);
+    client.release();
+
+    // Return a response indicating success
+    res.status(200).send('PDF saved successfully');
+  } catch (error) {
+    console.error('Error saving PDF:', error);
+    res.status(500).send('Error saving PDF');
+  }
+});
   
   
   

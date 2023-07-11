@@ -10,7 +10,8 @@ const downloadPDF ="SELECT resumefile FROM employeepersonaldetails WHERE employe
 const addProjectDetails = "insert into employeeprojectdetails(employeeid,projectname,startdate,enddate,technologiesused,rolesandresponsibilities,projectdescription) VALUES($1,$2,$3,$4,$5,$6,$7)";
 const addCertificateDetails = "insert into certificateandskillsdetails(employeeid,certificationname,certificationdate,certificationexpirydate,technicalskills) VALUES($1,$2,$3,$4,$5)";
 const getProjects = "select projectname,startdate,enddate,technologiesused,rolesandresponsibilities,projectdescription from employeeprojectdetails";
+const getResumeFile = 'SELECT resumefile FROM employeepersonaldetails WHERE employeeid = $1';
 module.exports ={
     getEmployee,getEmployeeById,checkEmailExists,addEmployee,removeEmployee,updateEmployee,downloadPDF,getUser,
-    addProjectDetails,getProjects,addCertificateDetails
+    addProjectDetails,getProjects,addCertificateDetails,getResumeFile
 }
