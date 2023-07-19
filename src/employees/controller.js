@@ -24,7 +24,8 @@ const getEmployeeById = (req, res) => {
   })
 };
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 const addEmployee = async (req, res) => {
   try {
     const { name, email, phonenumber, address, zipcode, profilesummary } = req.body;
