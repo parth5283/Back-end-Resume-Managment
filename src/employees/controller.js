@@ -195,47 +195,57 @@ const updateEmployee = (req, res) => {
 
 }
 
-
 const savePDFToDatabase = async (req, res) => {
+  const client = await pool.connect();
+
   try {
+    // Access the employeeId from the request body
+      console.log(req.file.buffer);
+    const pdfData = req.file.buffer; // Access the PDF data from the uploaded file
     const employeeId = req.body.employeeId;
-    const pdfData = req.body.pdfData;
+    const query = 'UPDATE employeepersonaldetails SET resumefile = $1 WHERE employeeid = $2';
+    const values = [Buffer.from(pdfData), employeeId]; // Convert pdfData to a Buffer before saving
 
-    const client = await pool.connect();
-    console.log("req",req.body);
-    console.log("employeeId",employeeId);
-    await client.query('UPDATE employeepersonaldetails SET resumefile = $1 WHERE employeeid = $2', [pdfData, employeeId]);
-    client.release();
+    await client.query(query, values);
 
-    res.status(200).send('PDF saved to database successfully');
+    console.log('PDF data saved to the database successfully.');
+
+    res.json({ message: 'PDF data saved to the database successfully.' });
   } catch (error) {
     console.error('Error saving PDF:', error);
     res.status(500).send('Error saving PDF to database');
+  } finally {
+    client.release();
   }
 };
 
-const getResumeFile = (req, res) => {
-  const id = parseInt(req.params.id);
-
-  if (isNaN(id)) {
-    return res.status(400).send("Invalid employee ID");
+const getResumeFile = async (req, res) => {
+  const client = await pool.connect();
+  try {
+   // console.log(req.params);
+    const employeeid = req.params.id;
+   // console.log("employeeid",employeeid)
+    const query = 'SELECT resumefile FROM employeepersonaldetails WHERE employeeid = $1';
+    const queryResult = await client.query(query, [employeeid]);
+    // console.log("employeeId",employeeid);
+    // console.log(queryResult.rowCount)
+    // Assuming only one row is expected, and the resumefile column is 'bytea' type
+    if (queryResult.rowCount === 1) {
+      const pdfData = queryResult.rows[0].resumefile;
+      //console.log("pdfData",pdfData)
+      res.setHeader('Content-Type', 'application/pdf');
+      const base64Data = pdfData.toString('base64');
+      res.send(base64Data)
+      //res.send(pdfData);
+     // console.log(base64Data);
+    } else {
+      throw new Error('No data found.');
+    }
+  } catch (error) {
+    throw new Error('Error fetching resume file: ' + error.message);
+  } finally {
+    client.release(); // Release the client back to the pool after the query is done
   }
-
-  pool.query(queries.getResumeFile, [id], (error, results) => {
-    if (error) {
-      console.log(error);
-      return res.status(500).send("An error occurred");
-    }
-
-    const noEmployeeFound = !results || !results.rows || results.rows.length === 0;
-    if (noEmployeeFound) {
-      return res.status(404).send("Employee does not exist in the database");
-    }
-
-    const resumeFile = results.rows[0].resumefile;
-    res.setHeader('Content-Type', 'application/pdf');
-    res.send(resumeFile);
-  });
 };
 module.exports = {
   getEmployeeDetails, getEmployeeById, addEmployee, removeEmployee, updateEmployee,
