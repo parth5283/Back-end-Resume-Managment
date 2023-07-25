@@ -141,6 +141,8 @@ const getUserDetails = (req, res) => {
     res.status(200).json(results.rows);
   })
 };
+
+
 // Delete employee from database
 const removeEmployee = (req, res) => {
   const id = parseInt(req.params.id);

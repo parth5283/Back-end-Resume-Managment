@@ -35,6 +35,8 @@ db.sequelize.sync().then(() => {
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
+    console.log(username);
+    console.log(password);
   
     // Perform login logic (e.g., check against database)
     pool.query('SELECT username,password FROM userdetails WHERE username = $1 AND password = $2', [username, password], (err, result) => {
