@@ -5,8 +5,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.INTEGER,
             references: {
               model: "employeepersonaldetails",
-              key: "employeeid"
+              key: "employeeid",
+              onDelete: "CASCADE"
             }
+           
           },
           certificationid: {
             type: Sequelize.INTEGER,

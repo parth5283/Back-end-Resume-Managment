@@ -222,17 +222,18 @@ const savePDFToDatabase = async (req, res) => {
 const getResumeFile = async (req, res) => {
   const client = await pool.connect();
   try {
-   // console.log(req.params);
+   //console.log(req.params);
     const employeeid = req.params.id;
+   console.log(employeeid);
    // console.log("employeeid",employeeid)
     const query = 'SELECT resumefile FROM employeepersonaldetails WHERE employeeid = $1';
     const queryResult = await client.query(query, [employeeid]);
     // console.log("employeeId",employeeid);
-    // console.log(queryResult.rowCount)
+    console.log(queryResult.rowCount)
     // Assuming only one row is expected, and the resumefile column is 'bytea' type
     if (queryResult.rowCount === 1) {
       const pdfData = queryResult.rows[0].resumefile;
-      //console.log("pdfData",pdfData)
+      console.log("queryResult.rows[0]",queryResult.rows[0])
       res.setHeader('Content-Type', 'application/pdf');
       const base64Data = pdfData.toString('base64');
       res.send(base64Data)
