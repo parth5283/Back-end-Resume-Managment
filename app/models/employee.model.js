@@ -21,7 +21,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING
       },
       profilesummary: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
     
       resumefile:{

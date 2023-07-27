@@ -46,10 +46,11 @@ const addEmployee = async (req, res) => {
       profilesummary,
     ]);
 
-    console.log('Employee added successfully. Employee ID:', addEmployeeResult.rows[0].employeeid);
+    console.log('Employee added successfully. Employee ID:', addEmployeeResult.rows[0]);
     return res.send({
       message: 'Employee added successfully',
-      employeeId: addEmployeeResult.rows[0].employeeid
+      employeeId: addEmployeeResult.rows[0].employeeid,
+      name: addEmployeeResult.rows[0].name
     });
   } catch (error) {
     console.log(error);
@@ -150,7 +151,16 @@ const removeEmployee = (req, res) => {
   if (isNaN(id)) {
     return res.status(400).send("Invalid employee ID");
   }
+  pool.query('BEGIN');
 
+  // The first DELETE query
+  pool.query('DELETE FROM employeeprojectdetails WHERE employeeid = $1', [id]);
+
+  // The second DELETE query
+  pool.query('DELETE FROM certificateandskillsdetails WHERE employeeid = $1', [id]);
+
+  // Commit the transaction
+  pool.query('COMMIT');
   pool.query(queries.getEmployeeById, [id], (error, results) => {
     if (error) {
       console.log(error);

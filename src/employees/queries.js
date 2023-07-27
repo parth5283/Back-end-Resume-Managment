@@ -3,7 +3,7 @@ const getUser = "SELECT username,password FROM userdetails WHERE username = $1 A
 const getEmployeeById = "SELECT  * FROM employeepersonaldetails where employeeid = $1";
 const checkEmailExists = "select * from employeepersonaldetails epd WHERE epd.email =$1";
 const addEmployee =
-"insert into employeepersonaldetails(name,email,phonenumber,address,zipcode,profilesummary) VALUES($1,$2,$3,$4,$5,$6) returning employeeid";
+"insert into employeepersonaldetails(name,email,phonenumber,address,zipcode,profilesummary) VALUES($1,$2,$3,$4,$5,$6) returning employeeid,name";
 const removeEmployee =  "delete from employeepersonaldetails where employeeid =$1 ";
 const updateEmployee ="update employeepersonaldetails SET name = $1,email = $2 WHERE employeeid = $3";
 const downloadPDF ="SELECT resumefile FROM employeepersonaldetails WHERE employeeid = $1";

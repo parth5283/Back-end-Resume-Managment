@@ -27,10 +27,10 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
           },
           rolesandresponsibilities: {
-            type: Sequelize.STRING
+            type: Sequelize.TEXT
           },
           projectdescription: {
-            type: Sequelize.STRING
+            type: Sequelize.TEXT
           }
     
         });
