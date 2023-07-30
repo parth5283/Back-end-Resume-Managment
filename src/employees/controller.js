@@ -72,7 +72,6 @@ const getProjectDetails = (req, res) => {
 // Adding Certificate details to database
 const addCertificateDetails = (req, res) => {
   const { certificates } = req.body;
-  console.log("certificates:", certificates);
   certificates.forEach((certificate) => {
     const {
       employeeId,
@@ -83,7 +82,7 @@ const addCertificateDetails = (req, res) => {
         technicalskills: technicalskills,
       }
     } = certificate;
-    console.log("certificate:", certificate);
+    
     pool.query(
       queries.addCertificateDetails,
       [employeeId, certificate.certificate.certificationname,
@@ -107,7 +106,6 @@ const addCertificateDetails = (req, res) => {
 const addProjectDetails = (req, res) => {
   const { projects } = req.body;
 
-  console.log("projects:", projects);
   projects.forEach((project) => {
     const {
       employeeId,

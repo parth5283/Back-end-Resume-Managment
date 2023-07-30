@@ -25,6 +25,8 @@ module.exports = (sequelize, Sequelize) => {
           technicalskills: {
             type: Sequelize.STRING
           }
+        }, {
+          timestamps: false 
         });
       
   

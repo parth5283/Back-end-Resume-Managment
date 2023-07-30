@@ -27,6 +27,8 @@ module.exports = (sequelize, Sequelize) => {
       resumefile:{
         type: Sequelize.BLOB
       }
+    }, {
+      timestamps: false 
     });
   
     return personalDetails;

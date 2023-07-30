@@ -33,6 +33,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.TEXT
           }
     
+        }, {
+          timestamps: false
         });
       
   
