@@ -7,6 +7,7 @@ const bodyParser = require("body-parser");
 const app = express();
 app.use(cors());
 
+// get all employees from database
 const getEmployeeDetails = (req, res) => {
   pool.query(queries.getEmployee, (error, results) => {
     if (error) throw error;
@@ -14,6 +15,7 @@ const getEmployeeDetails = (req, res) => {
   })
 };
 
+// get employees based on id from database
 const getEmployeeById = (req, res) => {
   const id = parseInt(req.params.id);
   pool.query(queries.getEmployeeById, [id], (error, results) => {
@@ -24,8 +26,10 @@ const getEmployeeById = (req, res) => {
   })
 };
 
-app.use(bodyParser.json({limit: '50mb'}));
-app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
+// Adding Employee personal details to database
 const addEmployee = async (req, res) => {
   try {
     const { name, email, phonenumber, address, zipcode, profilesummary } = req.body;
@@ -58,12 +62,15 @@ const addEmployee = async (req, res) => {
   }
 };
 
+// Get Project details from database
 const getProjectDetails = (req, res) => {
   pool.query(queries.getProjects, (error, results) => {
     if (error) throw error;
     res.status(200).json(results.rows);
   })
 };
+
+// Adding Certificate details to database
 const addCertificateDetails = (req, res) => {
   const { certificates } = req.body;
   console.log("certificates:", certificates);
@@ -96,6 +103,8 @@ const addCertificateDetails = (req, res) => {
 
   res.status(200).send('Certificate and skills added successfully');
 }
+
+// Adding Project details to database
 const addProjectDetails = (req, res) => {
   const { projects } = req.body;
 
@@ -136,6 +145,7 @@ const addProjectDetails = (req, res) => {
   res.status(200).send('Projects added successfully');
 };
 
+// Getting user details from db
 const getUserDetails = (req, res) => {
   pool.query(queries.getUser, (error, results) => {
     if (error) throw error;
@@ -183,6 +193,7 @@ const removeEmployee = (req, res) => {
   });
 };
 
+// update employee based on id
 const updateEmployee = (req, res) => {
   const id = parseInt(req.params.id);
   const { name, email } = req.body;
@@ -205,12 +216,13 @@ const updateEmployee = (req, res) => {
 
 }
 
+// Saving PDF to database
 const savePDFToDatabase = async (req, res) => {
   const client = await pool.connect();
 
   try {
     // Access the employeeId from the request body
-      console.log(req.file.buffer);
+    console.log(req.file.buffer);
     const pdfData = req.file.buffer; // Access the PDF data from the uploaded file
     const employeeId = req.body.employeeId;
     const query = 'UPDATE employeepersonaldetails SET resumefile = $1 WHERE employeeid = $2';
@@ -229,13 +241,14 @@ const savePDFToDatabase = async (req, res) => {
   }
 };
 
+// Getting saved resume from database
 const getResumeFile = async (req, res) => {
   const client = await pool.connect();
   try {
-   //console.log(req.params);
+    //console.log(req.params);
     const employeeid = req.params.id;
-   console.log(employeeid);
-   // console.log("employeeid",employeeid)
+    console.log(employeeid);
+    // console.log("employeeid",employeeid)
     const query = 'SELECT resumefile FROM employeepersonaldetails WHERE employeeid = $1';
     const queryResult = await client.query(query, [employeeid]);
     // console.log("employeeId",employeeid);
@@ -243,12 +256,12 @@ const getResumeFile = async (req, res) => {
     // Assuming only one row is expected, and the resumefile column is 'bytea' type
     if (queryResult.rowCount === 1) {
       const pdfData = queryResult.rows[0].resumefile;
-      console.log("queryResult.rows[0]",queryResult.rows[0])
+      console.log("queryResult.rows[0]", queryResult.rows[0])
       res.setHeader('Content-Type', 'application/pdf');
       const base64Data = pdfData.toString('base64');
       res.send(base64Data)
       //res.send(pdfData);
-     // console.log(base64Data);
+      // console.log(base64Data);
     } else {
       throw new Error('No data found.');
     }
@@ -260,5 +273,5 @@ const getResumeFile = async (req, res) => {
 };
 module.exports = {
   getEmployeeDetails, getEmployeeById, addEmployee, removeEmployee, updateEmployee,
-  addProjectDetails, getProjectDetails, getUserDetails, addCertificateDetails,savePDFToDatabase,getResumeFile
+  addProjectDetails, getProjectDetails, getUserDetails, addCertificateDetails, savePDFToDatabase, getResumeFile
 };
