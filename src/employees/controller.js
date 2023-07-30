@@ -50,7 +50,6 @@ const addEmployee = async (req, res) => {
       profilesummary,
     ]);
 
-    console.log('Employee added successfully. Employee ID:', addEmployeeResult.rows[0]);
     return res.send({
       message: 'Employee added successfully',
       employeeId: addEmployeeResult.rows[0].employeeid,
@@ -119,12 +118,10 @@ const addProjectDetails = (req, res) => {
         technologiesUsed: technologiesused,
         rolesAndResponsibilities: rolesandresponsibilities,
         projectDescription: projectdescription,
-        // Include other project properties
+       
       }
     } = project;
 
-    console.log("project:", project);
-    // Add project to the database using your desired method (e.g., using pool.query)
     pool.query(
       queries.addProjectDetails,
       [employeeId, project.project.projectname,
@@ -163,13 +160,10 @@ const removeEmployee = (req, res) => {
   }
   pool.query('BEGIN');
 
-  // The first DELETE query
   pool.query('DELETE FROM employeeprojectdetails WHERE employeeid = $1', [id]);
 
-  // The second DELETE query
   pool.query('DELETE FROM certificateandskillsdetails WHERE employeeid = $1', [id]);
 
-  // Commit the transaction
   pool.query('COMMIT');
   pool.query(queries.getEmployeeById, [id], (error, results) => {
     if (error) {
@@ -221,17 +215,11 @@ const savePDFToDatabase = async (req, res) => {
   const client = await pool.connect();
 
   try {
-    // Access the employeeId from the request body
-    console.log(req.file.buffer);
-    const pdfData = req.file.buffer; // Access the PDF data from the uploaded file
+    const pdfData = req.file.buffer; 
     const employeeId = req.body.employeeId;
     const query = 'UPDATE employeepersonaldetails SET resumefile = $1 WHERE employeeid = $2';
-    const values = [Buffer.from(pdfData), employeeId]; // Convert pdfData to a Buffer before saving
-
+    const values = [Buffer.from(pdfData), employeeId]; 
     await client.query(query, values);
-
-    console.log('PDF data saved to the database successfully.');
-
     res.json({ message: 'PDF data saved to the database successfully.' });
   } catch (error) {
     console.error('Error saving PDF:', error);
@@ -245,30 +233,24 @@ const savePDFToDatabase = async (req, res) => {
 const getResumeFile = async (req, res) => {
   const client = await pool.connect();
   try {
-    //console.log(req.params);
     const employeeid = req.params.id;
-    console.log(employeeid);
-    // console.log("employeeid",employeeid)
     const query = 'SELECT resumefile FROM employeepersonaldetails WHERE employeeid = $1';
     const queryResult = await client.query(query, [employeeid]);
-    // console.log("employeeId",employeeid);
-    console.log(queryResult.rowCount)
-    // Assuming only one row is expected, and the resumefile column is 'bytea' type
+   
     if (queryResult.rowCount === 1) {
       const pdfData = queryResult.rows[0].resumefile;
-      console.log("queryResult.rows[0]", queryResult.rows[0])
+     
       res.setHeader('Content-Type', 'application/pdf');
       const base64Data = pdfData.toString('base64');
       res.send(base64Data)
-      //res.send(pdfData);
-      // console.log(base64Data);
+    
     } else {
       throw new Error('No data found.');
     }
   } catch (error) {
     throw new Error('Error fetching resume file: ' + error.message);
   } finally {
-    client.release(); // Release the client back to the pool after the query is done
+    client.release(); 
   }
 };
 module.exports = {
